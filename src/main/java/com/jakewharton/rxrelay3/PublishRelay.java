@@ -13,12 +13,14 @@
 
 package com.jakewharton.rxrelay3;
 
-import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.annotations.CheckReturnValue;
 import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.disposables.Disposable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.common.value.qual.MinLen;
 
 /**
  * Relay that, once an {@link Observer} has subscribed, emits all subsequently observed items to the
@@ -42,6 +44,7 @@ import java.util.concurrent.atomic.AtomicReference;
   } </pre>
  */
 public final class PublishRelay<T> extends Relay<T> {
+
     /** An empty subscribers array to avoid allocating it all the time. */
     @SuppressWarnings("rawtypes")
     static final PublishDisposable[] EMPTY = new PublishDisposable[0];
@@ -104,6 +107,7 @@ public final class PublishRelay<T> extends Relay<T> {
     @SuppressWarnings("unchecked")
     void remove(PublishDisposable<T> ps) {
         for (;;) {
+            @MinLen(1)
             PublishDisposable<T>[] a = subscribers.get();
             if (a == EMPTY) {
                 return;
@@ -156,7 +160,9 @@ public final class PublishRelay<T> extends Relay<T> {
      *
      * @param <T> the value type
      */
-    static final class PublishDisposable<T> extends AtomicBoolean implements Disposable {
+    static final class PublishDisposable<T>
+        extends AtomicBoolean
+        implements Disposable {
 
         private static final long serialVersionUID = 3562861878281475070L;
         /** The actual subscriber. */

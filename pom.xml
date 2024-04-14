@@ -77,8 +77,8 @@
 						</path>
 					</annotationProcessorPaths>
 					<annotationProcessors>
-						<!-- Add all the checkers you want to enable here -->
-						<annotationProcessor>org.checkerframework.checker.nullness.NullnessChecker</annotationProcessor>
+						<!-- CheckerFramework checkers (refer to https://checkerframework.org/manual/#introduction) -->
+						<annotationProcessor>org.checkerframework.checker.index.IndexChecker</annotationProcessor>
 					</annotationProcessors>
 					<compilerArgs>
 						<arg>-Xmaxerrs</arg>

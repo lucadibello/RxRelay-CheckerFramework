@@ -13,9 +13,9 @@
 
 package com.jakewharton.rxrelay3;
 
-import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.annotations.CheckReturnValue;
 import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.functions.Consumer;
 
 /**
@@ -27,8 +27,10 @@ import io.reactivex.rxjava3.functions.Consumer;
  * @param <T> the item value type
  */
 public abstract class Relay<T> extends Observable<T> implements Consumer<T> {
+
     /** {@inheritDoc} */
-    @Override public abstract void accept(@NonNull T value); // Redeclare without checked exception.
+    @Override
+    public abstract void accept(@NonNull T value); // Redeclare without checked exception.
 
     /**
      * Returns true if the subject has any Observers.
@@ -40,9 +42,8 @@ public abstract class Relay<T> extends Observable<T> implements Consumer<T> {
      * Wraps this Relay and serializes the calls to {@link #accept}, making it thread-safe.
      * <p>The method is thread-safe.
      */
-    @NonNull
     @CheckReturnValue
-    public final Relay<T> toSerialized() {
+    public final @NonNull Relay<T> toSerialized() {
         if (this instanceof SerializedRelay) {
             return this;
         }
