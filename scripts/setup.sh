@@ -12,6 +12,21 @@ fi
 echo "Installing dependencies..."
 mvn clean install -DskipTests
 
+# Check if failed
+if [ $? -ne 0 ]; then
+  echo "Failed to install dependencies."
+  exit 1
+fi
+
+# Use lastest version of checkerframework
+mvn versions:use-latest-versions -Dincludes="org.checkerframework:*"
+
 # Run tests
 echo "Running tests..."
 mvn test
+
+# Check if failed
+if [ $? -ne 0 ]; then
+  echo "Failed to run tests."
+  exit 1
+fi
