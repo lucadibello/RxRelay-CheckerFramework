@@ -870,7 +870,7 @@ public final class ReplayRelay<T> extends Relay<T> {
                     array = (T[]) Array.newInstance(array.getClass().getComponentType(), s); // Is this supported by Checker Framework?
                 }
 
-                // HELPER VARIABLE: CheckerFramework does not infer that the array is at least s long
+                // HELPER VARIABLE: CheckerFramework does not infer that the array is at least s long (array.length >= s)
                 // I think that the call to Array.newInstance is not enough to infer that the array is at least s long
                 @LTEqLengthOf("array") int actualS = Math.min(array.length, s);
                 for (@LTEqLengthOf("array") int i = 0; i < actualS; i++) {
