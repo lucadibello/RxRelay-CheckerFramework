@@ -86,7 +86,7 @@
 						<arg>-Xmaxwarns</arg>
 						<arg>10000</arg>
 						<!-- -Awarns turns type-checking errors into warnings. -->
-						<!-- <arg>-Awarns</arg> -->
+						<arg>-Awarns</arg>
 					</compilerArgs>
 				</configuration>
 				<dependencies>

@@ -19,6 +19,10 @@ import io.reactivex.rxjava3.annotations.CheckReturnValue;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.annotations.Nullable;
 import io.reactivex.rxjava3.disposables.Disposable;
+import org.checkerframework.checker.index.qual.*;
+import org.checkerframework.common.value.qual.ArrayLen;
+import org.checkerframework.common.value.qual.MinLen;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -851,24 +855,30 @@ public final class ReplayRelay<T> extends Relay<T> {
         @SuppressWarnings("unchecked")
         public T[] getValues(T[] array) {
             TimedNode<T> h = getHead();
-            int s = size(h);
+            // We get the size of the entire linked list
+            @NonNegative int s = size(h);
 
+            // If empty, set first element of the array to null (if the array is not empty)
             if (s == 0) {
                 if (array.length != 0) {
                     array[0] = null;
                 }
             } else {
+                // If the passed array is too small to allocate all elements, allocate a new array of size s
                 if (array.length < s) {
-                    array = (T[]) Array.newInstance(array.getClass().getComponentType(), s);
+                    // Now the array has length s: array.length == s
+                    array = (T[]) Array.newInstance(array.getClass().getComponentType(), s); // Is this supported by Checker Framework?
                 }
 
-                int i = 0;
-                while (i != s) {
+                // HELPER VARIABLE: CheckerFramework does not infer that the array is at least s long
+                // I think that the call to Array.newInstance is not enough to infer that the array is at least s long
+                @LTEqLengthOf("array") int actualS = Math.min(array.length, s);
+                for (@LTEqLengthOf("array") int i = 0; i < actualS; i++) {
                     TimedNode<T> next = h.get();
                     array[i] = next.value;
-                    i++;
                     h = next;
                 }
+
                 if (array.length > s) {
                     array[s] = null;
                 }
@@ -936,8 +946,9 @@ public final class ReplayRelay<T> extends Relay<T> {
             return size(getHead());
         }
 
+        @NonNegative
         int size(TimedNode<T> h) {
-            int s = 0;
+            @NonNegative int s = 0;
             while (s != Integer.MAX_VALUE) {
                 TimedNode<T> next = h.get();
                 if (next == null) {
