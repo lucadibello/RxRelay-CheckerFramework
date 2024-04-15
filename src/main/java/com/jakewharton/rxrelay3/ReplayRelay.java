@@ -247,8 +247,7 @@ public final class ReplayRelay<T> extends Relay<T> {
      * Returns a single value the Relay currently has or null if no such value exists.
      * <p>The method is thread-safe.
      */
-    @Nullable
-    public T getValue() {
+    public @Nullable T getValue() {
         return buffer.getValue();
     }
 
@@ -433,9 +432,8 @@ public final class ReplayRelay<T> extends Relay<T> {
         }
 
         @Override
-        @Nullable
         @SuppressWarnings("unchecked")
-        public T getValue() {
+        public @Nullable T getValue() {
             int s = size;
             if (s != 0) {
                 return buffer.get(s - 1);
@@ -611,9 +609,8 @@ public final class ReplayRelay<T> extends Relay<T> {
         }
 
         @Override
-        @Nullable
         @SuppressWarnings("unchecked")
-        public T getValue() {
+        public @Nullable T getValue() {
             Node<T> h = head;
 
             for (;;) {
@@ -814,9 +811,8 @@ public final class ReplayRelay<T> extends Relay<T> {
         }
 
         @Override
-        @Nullable
         @SuppressWarnings("unchecked")
-        public T getValue() {
+        public @Nullable T getValue() {
             TimedNode<T> h = head;
 
             for (;;) {

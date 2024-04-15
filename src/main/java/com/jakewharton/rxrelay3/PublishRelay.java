@@ -50,7 +50,7 @@ public final class PublishRelay<T> extends Relay<T> {
     static final PublishDisposable[] EMPTY = new PublishDisposable[0];
 
     /** The array of currently subscribed subscribers. */
-    final AtomicReference<PublishDisposable<T>[]> subscribers;
+    final @MinLen(1) AtomicReference<PublishDisposable<T>[]> subscribers;
 
     /**
      * Constructs a PublishRelay.
@@ -107,8 +107,7 @@ public final class PublishRelay<T> extends Relay<T> {
     @SuppressWarnings("unchecked")
     void remove(PublishDisposable<T> ps) {
         for (;;) {
-            @MinLen(1)
-            PublishDisposable<T>[] a = subscribers.get();
+            @MinLen(1) PublishDisposable<T>[] a = subscribers.get();
             if (a == EMPTY) {
                 return;
             }
