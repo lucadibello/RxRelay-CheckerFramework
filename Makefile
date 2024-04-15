@@ -10,5 +10,5 @@ build:
 
 compile:
 	@echo "Checking the Java project"
-	@bash ./scripts/check.sh
+	@bash ./scripts/compile.sh
 	@echo "Java project check complete."
