@@ -21,6 +21,7 @@ import io.reactivex.rxjava3.annotations.Nullable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import org.checkerframework.checker.index.qual.*;
 import org.checkerframework.common.value.qual.ArrayLen;
+import org.checkerframework.common.value.qual.EnsuresMinLenIf;
 import org.checkerframework.common.value.qual.MinLen;
 
 import java.lang.reflect.Array;
@@ -334,26 +335,47 @@ public final class ReplayRelay<T> extends Relay<T> {
             if (a == EMPTY) {
                 return;
             }
-            int len = a.length;
-            int j = -1;
-            for (int i = 0; i < len; i++) {
+            final @NonNegative @LengthOf("a") int len = a.length;
+            @LTLengthOf("a") @IndexOrLow("a") int j = -1;
+            for (@NonNegative @LTEqLengthOf("a") int i = 0; i < len; i++) {
                 if (a[i] == rs) {
                     j = i;
                     break;
                 }
             }
 
-            if (j < 0) {
+            // If the item was not found, we don't need to do anything
+            if (j < 0 || len == 0) { // len == 0 not needed, but it helps Checker Framework
                 return;
             }
+
+            // If the item was found, means that
+            // 1) len is for sure > 0
+            assert len > 0;
+            // 2) j is for sure >= 0
+            assert j >= 0;
+            // 3) j is for sure < len
+            assert j < len;
+
+            // Create a new array with the item removed
             ReplayDisposable<T>[] b;
             if (len == 1) {
+                // If the length is 1, we can just use the EMPTY array (we have removed the only item)
                 b = EMPTY;
             } else {
-                b = new ReplayDisposable[len - 1];
-                System.arraycopy(a, 0, b, 0, j);
-                System.arraycopy(a, j + 1, b, j, len - j - 1);
+                // On the other hand, if the length is greater than 1, we need to create a new array
+                b = new @MinLen(1) ReplayDisposable[len - 1];
+
+                // FIXME: This if statement is not needed, but it helps Checker Framework
+                // I need to find a better way to infer that j is always < len
+                if (j < len) {
+                    // We copy the items before and after the item (effectively removing it)
+                    System.arraycopy(a, 0, b, 0, j);
+                    System.arraycopy(a, j + 1, b, j, len - j - 1);
+                }
             }
+
+            // Update the observers array with the new array with the item removed
             if (observers.compareAndSet(a, b)) {
                 return;
             }
@@ -417,9 +439,9 @@ public final class ReplayRelay<T> extends Relay<T> {
 
         final List<T> buffer;
 
-        volatile int size;
+        volatile @Positive int size;
 
-        UnboundedReplayBuffer(int capacityHint) {
+        UnboundedReplayBuffer(@Positive int capacityHint) {
             if (capacityHint <= 0) throw new IllegalArgumentException("capacityHint > 0 required but it was " + capacityHint);
             this.buffer = new ArrayList<T>(capacityHint);
         }
@@ -448,7 +470,7 @@ public final class ReplayRelay<T> extends Relay<T> {
         @Override
         @SuppressWarnings("unchecked")
         public T[] getValues(T[] array) {
-            int s = size;
+            @Positive int s = size;
             if (s == 0) {
                 if (array.length != 0) {
                     array[0] = null;
@@ -457,10 +479,13 @@ public final class ReplayRelay<T> extends Relay<T> {
             }
 
             if (array.length < s) {
-                array = (T[]) Array.newInstance(array.getClass().getComponentType(), s);
+                array = (T[]) Array.newInstance(array.getClass().getComponentType(), s); // Requires reflection resolution
             }
+
+            // HELPER VARIABLE: CheckerFramework does not infer that the array is at least s long (array.length >= s)
+            @NonNegative @LTEqLengthOf("array") int actualS = Math.min(array.length, s);
             List<T> b = buffer;
-            for (int i = 0; i < s; i++) {
+            for (@NonNegative @LTEqLengthOf("array") int i = 0; i < actualS; i++) {
                 array[i] = b.get(i);
             }
             if (array.length > s) {
@@ -632,7 +657,7 @@ public final class ReplayRelay<T> extends Relay<T> {
         @SuppressWarnings("unchecked")
         public T[] getValues(T[] array) {
             Node<T> h = head;
-            int s = size();
+            @NonNegative int s = size();
 
             if (s == 0) {
                 if (array.length != 0) {
@@ -643,8 +668,11 @@ public final class ReplayRelay<T> extends Relay<T> {
                     array = (T[]) Array.newInstance(array.getClass().getComponentType(), s);
                 }
 
-                int i = 0;
-                while (i != s) {
+                // HELPER VARIABLE: CheckerFramework does not infer that the array is at least s long (array.length >= s)
+                // I think that the call to Array.newInstance is not enough to infer that the array is at least s long
+                @NonNegative @LTEqLengthOf("array") int actualS = Math.min(array.length, s);
+                @NonNegative @LTEqLengthOf("array") int i = 0;
+                while (i < actualS) {
                     Node<T> next = h.get();
                     array[i] = next.value;
                     i++;
@@ -706,8 +734,9 @@ public final class ReplayRelay<T> extends Relay<T> {
         }
 
         @Override
+        @NonNegative
         public int size() {
-            int s = 0;
+            @NonNegative int s = 0;
             Node<T> h = head;
             while (s != Integer.MAX_VALUE) {
                 Node<T> next = h.get();
@@ -872,10 +901,12 @@ public final class ReplayRelay<T> extends Relay<T> {
 
                 // HELPER VARIABLE: CheckerFramework does not infer that the array is at least s long (array.length >= s)
                 // I think that the call to Array.newInstance is not enough to infer that the array is at least s long
-                @LTEqLengthOf("array") int actualS = Math.min(array.length, s);
-                for (@LTEqLengthOf("array") int i = 0; i < actualS; i++) {
+                @NonNegative @LTEqLengthOf("array") int actualS = Math.min(array.length, s);
+                @NonNegative @LTEqLengthOf("array") int i = 0;
+                while (i < actualS) {
                     TimedNode<T> next = h.get();
                     array[i] = next.value;
+                    i++;
                     h = next;
                 }
 
