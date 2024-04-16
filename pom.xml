@@ -78,6 +78,8 @@
 					</annotationProcessorPaths>
 					<annotationProcessors>
 						<!-- CheckerFramework checkers (refer to https://checkerframework.org/manual/#introduction) -->
+
+						<!-- Index checker to check for array index out of bounds -->
 						<annotationProcessor>org.checkerframework.checker.index.IndexChecker</annotationProcessor>
 					</annotationProcessors>
 					<compilerArgs>
@@ -85,6 +87,8 @@
 						<arg>10000</arg>
 						<arg>-Xmaxwarns</arg>
 						<arg>10000</arg>
+						<!-- Turn on reflection resolution -->
+						<arg>-AresolveReflection</arg>
 						<!-- -Awarns turns type-checking errors into warnings. -->
 						<arg>-Awarns</arg>
 					</compilerArgs>
