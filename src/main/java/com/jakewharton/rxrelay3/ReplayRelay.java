@@ -90,7 +90,7 @@ public final class ReplayRelay<T> extends Relay<T> {
      */
     @CheckReturnValue
     @NonNull
-    public static <T> ReplayRelay<T> create(int capacityHint) {
+    public static <T> ReplayRelay<T> create(@Positive int capacityHint) {
         return new ReplayRelay<T>(new UnboundedReplayBuffer<T>(capacityHint));
     }
 
@@ -337,6 +337,8 @@ public final class ReplayRelay<T> extends Relay<T> {
             }
             final @NonNegative @LengthOf("a") int len = a.length;
             @LTLengthOf("a") @IndexOrLow("a") int j = -1;
+
+            // Look for the item to remove
             for (@NonNegative @LTEqLengthOf("a") int i = 0; i < len; i++) {
                 if (a[i] == rs) {
                     j = i;
@@ -345,17 +347,15 @@ public final class ReplayRelay<T> extends Relay<T> {
             }
 
             // If the item was not found, we don't need to do anything
-            if (j < 0 || len == 0) { // len == 0 not needed, but it helps Checker Framework
+            if (j < 0) { // FIXME: len == 0 not needed, but it helps Checker Framework
                 return;
             }
 
-            // If the item was found, means that
-            // 1) len is for sure > 0
-            assert len > 0;
-            // 2) j is for sure >= 0
-            assert j >= 0;
-            // 3) j is for sure < len
-            assert j < len;
+            // Infer manually information about the len and j variables as Checker Framework is not able to
+            // a) Infer that the length is for sure greater than 0
+            assert len > 0: "@AssumeAssertion(index): The length is always greater than 0, otherwise J would be -1";
+            // b) Infer that J is for sure less than the length
+            assert j < len: "@AssumeAssertion(index): By nature, J is always less than the length (as the loop condition is i < len)";
 
             // Create a new array with the item removed
             ReplayDisposable<T>[] b;
@@ -366,13 +366,9 @@ public final class ReplayRelay<T> extends Relay<T> {
                 // On the other hand, if the length is greater than 1, we need to create a new array
                 b = new @MinLen(1) ReplayDisposable[len - 1];
 
-                // FIXME: This if statement is not needed, but it helps Checker Framework
-                // I need to find a better way to infer that j is always < len
-                if (j < len) {
-                    // We copy the items before and after the item (effectively removing it)
-                    System.arraycopy(a, 0, b, 0, j);
-                    System.arraycopy(a, j + 1, b, j, len - j - 1);
-                }
+                // We copy the items before and after the item (effectively removing it)
+                System.arraycopy(a, 0, b, 0, j);
+                System.arraycopy(a, j + 1, b, j, len - j - 1);
             }
 
             // Update the observers array with the new array with the item removed
@@ -480,12 +476,12 @@ public final class ReplayRelay<T> extends Relay<T> {
 
             if (array.length < s) {
                 array = (T[]) Array.newInstance(array.getClass().getComponentType(), s); // Requires reflection resolution
+                // As the CheckerFramework is not able to infer that the array is of length s, we need to make an assertion
+                assert array.length == s: "@AssumeAssertion(index): The array is exactly of length s, as we have just created it";
             }
 
-            // HELPER VARIABLE: CheckerFramework does not infer that the array is at least s long (array.length >= s)
-            @NonNegative @LTEqLengthOf("array") int actualS = Math.min(array.length, s);
             List<T> b = buffer;
-            for (@NonNegative @LTEqLengthOf("array") int i = 0; i < actualS; i++) {
+            for (@NonNegative @LTEqLengthOf("array") int i = 0; i < s; i++) {
                 array[i] = b.get(i);
             }
             if (array.length > s) {

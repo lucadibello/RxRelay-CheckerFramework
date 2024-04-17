@@ -25,6 +25,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.checkerframework.checker.index.qual.*;
+
 /**
  * Relay that emits the most recent item it has observed and all subsequent observed items to each subscribed
  * {@link Observer}.
@@ -195,6 +197,7 @@ public final class BehaviorRelay<T> extends Relay<T> {
             }
         } else {
             array = (T[]) Array.newInstance(array.getClass().getComponentType(), 1);
+            assert array.length == 1: "@AssumeAssertion(index:array.access.unsafe.high.constant) The array length is for sure 1, but CheckerFramework is not able to detect it";
             array[0] = o;
         }
         return array;
@@ -227,11 +230,13 @@ public final class BehaviorRelay<T> extends Relay<T> {
     void remove(BehaviorDisposable<T> rs) {
         for (;;) {
             BehaviorDisposable<T>[] a = subscribers.get();
-            int len = a.length;
+            final @NonNegative @LengthOf("a") int len = a.length;
             if (len == 0) {
                 return;
             }
-            int j = -1;
+
+            // Look for the item to remove
+            @LTLengthOf("a") @IndexOrLow("a") int j = -1;
             for (int i = 0; i < len; i++) {
                 if (a[i] == rs) {
                     j = i;
@@ -242,11 +247,20 @@ public final class BehaviorRelay<T> extends Relay<T> {
             if (j < 0) {
                 return;
             }
+
+            // Infer manually information about the len and j variables as Checker Framework is not able to
+            // a) Infer that J is for sure less than the length
+            assert j < len: "@AssumeAssertion(index): By nature, J is always less than the length (as the loop condition is i < len)";
+
+            // Create a new array with the item removed
             BehaviorDisposable<T>[] b;
             if (len == 1) {
+                // If the length is 1, we can just use the EMPTY array (we have removed the only item)
                 b = EMPTY;
             } else {
+                // On the other hand, if the length is greater than 1, we need to create a new array
                 b = new BehaviorDisposable[len - 1];
+                // We copy the items before and after the item (effectively removing it)
                 System.arraycopy(a, 0, b, 0, j);
                 System.arraycopy(a, j + 1, b, j, len - j - 1);
             }
