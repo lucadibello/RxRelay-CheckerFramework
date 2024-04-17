@@ -20,8 +20,6 @@ import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.annotations.Nullable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import org.checkerframework.checker.index.qual.*;
-import org.checkerframework.common.value.qual.ArrayLen;
-import org.checkerframework.common.value.qual.EnsuresMinLenIf;
 import org.checkerframework.common.value.qual.MinLen;
 
 import java.lang.reflect.Array;
@@ -347,7 +345,7 @@ public final class ReplayRelay<T> extends Relay<T> {
             }
 
             // If the item was not found, we don't need to do anything
-            if (j < 0) { // FIXME: len == 0 not needed, but it helps Checker Framework
+            if (j < 0) {
                 return;
             }
 
