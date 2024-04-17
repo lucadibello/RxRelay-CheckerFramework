@@ -83,14 +83,23 @@
 						<annotationProcessor>org.checkerframework.checker.index.IndexChecker</annotationProcessor>
 					</annotationProcessors>
 					<compilerArgs>
+						<!-- Set maximum number of errors and warnings to report -->
 						<arg>-Xmaxerrs</arg>
 						<arg>10000</arg>
 						<arg>-Xmaxwarns</arg>
 						<arg>10000</arg>
+
 						<!-- Turn on reflection resolution -->
-						<arg>-AresolveReflection</arg>
+						<arg>-AresolveReflection=debug</arg>
+
 						<!-- -Awarns turns type-checking errors into warnings. -->
 						<arg>-Awarns</arg>
+
+						<!-- Require checker prefix when suppressing warnings -->
+						<arg>-ArequirePrefixInWarningSuppressions</arg>
+
+						<!-- Enable @AssumeAssertion annotation -->
+						<arg>-AassumeAssertionsAreEnabled</arg>
 					</compilerArgs>
 				</configuration>
 				<dependencies>
