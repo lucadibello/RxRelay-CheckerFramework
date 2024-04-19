@@ -229,9 +229,10 @@ public class ReplayRelayTest {
     }
 
     @Test
+    @SuppressWarnings("lowerbound:argument") // We know that the CheckerFramework will show a warning!
     public void createInvalidCapacity() {
         try {
-            ReplayRelay.create(-99);
+            ReplayRelay.create(-99); // Parameter annotated with @Positive, so this will show a warning!
             fail("Didn't throw IllegalArgumentException");
         } catch (IllegalArgumentException ex) {
             assertEquals("capacityHint > 0 required but it was -99", ex.getMessage());

@@ -14,6 +14,9 @@
 package com.jakewharton.rxrelay3;
 
 import io.reactivex.rxjava3.functions.Predicate;
+import org.checkerframework.checker.index.qual.LTLengthOf;
+import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.common.value.qual.MinLen;
 
 /**
  * A linked-array-list implementation that only supports appending and consumption.
@@ -21,19 +24,22 @@ import io.reactivex.rxjava3.functions.Predicate;
  * @param <T> the value type
  */
 class AppendOnlyLinkedArrayList<T> {
-    private final int capacity;
-    private final Object[] head;
-    private Object[] tail;
-    private int offset;
+
+    private final @NonNegative @LTLengthOf({"head", "tail"}) int capacity;
+    private final @MinLen(1) Object[] head; // Reference to first object of array
+    private @MinLen Object[] tail; // Reference to the last object of the array
+
+    // Position of the next element to be added
+    private @NonNegative int offset;
 
     /**
      * Constructs an empty list with a per-link capacity.
      * @param capacity the capacity of each link
      */
-    AppendOnlyLinkedArrayList(int capacity) {
-        this.capacity = capacity;
+    AppendOnlyLinkedArrayList(@NonNegative int capacity) {
         this.head = new Object[capacity + 1];
         this.tail = head;
+        this.capacity = capacity;
     }
 
     /**
@@ -42,15 +48,20 @@ class AppendOnlyLinkedArrayList<T> {
      * @param value the value to append
      */
     void add(T value) {
-        final int c = capacity;
+        // Save locally capacity of the array and the current offset (index to save next element)
+        final @NonNegative int c = capacity;
+        // Get the index of the last element
         int o = offset;
+        // If we have filled up the entire array, we need to enlarge it
         if (o == c) {
-            Object[] next = new Object[c + 1];
+            Object[] next = new Object[c + 1]; // Add one more slot for the next link
             tail[c] = next;
             tail = next;
             o = 0;
         }
+        // Save the value at the current offset
         tail[o] = value;
+        // Increase the offset to the next slot
         offset = o + 1;
     }
 
@@ -79,18 +90,18 @@ class AppendOnlyLinkedArrayList<T> {
                 if (o == null) {
                     break;
                 }
-                if (consumer.test((T)o)) {
+                if (consumer.test((T) o)) {
                     break;
                 }
             }
-            a = (Object[])a[c];
+            a = (Object[]) a[c];
         }
     }
 
     @SuppressWarnings("unchecked")
     void accept(Relay<? super T> observer) {
         Object[] a = head;
-        final int c = capacity;
+        final @NonNegative int c = capacity;
         while (a != null) {
             for (int i = 0; i < c; i++) {
                 Object o = a[i];
@@ -100,7 +111,7 @@ class AppendOnlyLinkedArrayList<T> {
 
                 observer.accept((T) o);
             }
-            a = (Object[])a[c];
+            a = (Object[]) a[c];
         }
     }
 }
