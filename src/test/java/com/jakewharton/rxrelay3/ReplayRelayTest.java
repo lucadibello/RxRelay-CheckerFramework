@@ -275,6 +275,7 @@ public class ReplayRelayTest {
     }
 
     @Test
+    @SuppressWarnings("index:array.access.unsafe.high.constant") // We know that the CheckerFramework will show some warnings
     public void peekStateUnbounded() {
         ReplayRelay<Integer> rp = ReplayRelay.create();
 
@@ -282,10 +283,12 @@ public class ReplayRelayTest {
 
         assertEquals((Integer)1, rp.getValue());
 
-        assertEquals(1, rp.getValues()[0]);
+        // :: error: (index)
+        assertEquals(1, rp.getValues()[0]); // expected warning on this line!
     }
 
     @Test
+    @SuppressWarnings("index:array.access.unsafe.high.constant") // We know that the CheckerFramework will show some warnings
     public void peekStateTimeAndSize() {
         ReplayRelay<Integer>
             rp = ReplayRelay.createWithTimeAndSize(1, TimeUnit.DAYS, Schedulers.computation(), 1);
@@ -294,20 +297,25 @@ public class ReplayRelayTest {
 
         assertEquals((Integer)1, rp.getValue());
 
-        assertEquals(1, rp.getValues()[0]);
+        // :: error: (index)
+        assertEquals(1, rp.getValues()[0]); // expected warning on this line!
 
         rp.accept(2);
 
         assertEquals((Integer)2, rp.getValue());
 
-        assertEquals(2, rp.getValues()[0]);
+        // :: error: (index)
+        assertEquals(2, rp.getValues()[0]); // expected warning on this line!
 
-        assertEquals((Integer)2, rp.getValues(new Integer[0])[0]);
+        // :: error: (index)
+        assertEquals((Integer)2, rp.getValues(new Integer[0])[0]); // expected warning on this line!
 
-        assertEquals((Integer)2, rp.getValues(new Integer[1])[0]);
+        // :: error: (index)
+        assertEquals((Integer)2, rp.getValues(new Integer[1])[0]); // expected warning on this line!
 
         Integer[] a = new Integer[2];
-        assertEquals((Integer)2, rp.getValues(a)[0]);
+        // :: error: (index)
+        assertEquals((Integer)2, rp.getValues(a)[0]); // expected warning on this line!
         assertNull(a[1]);
     }
 
