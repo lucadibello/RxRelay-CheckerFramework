@@ -14,8 +14,7 @@
 package com.jakewharton.rxrelay3;
 
 import io.reactivex.rxjava3.functions.Predicate;
-import org.checkerframework.checker.index.qual.LTLengthOf;
-import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.index.qual.*;
 import org.checkerframework.common.value.qual.MinLen;
 
 /**
@@ -29,8 +28,8 @@ class AppendOnlyLinkedArrayList<T> {
     private final @MinLen(1) Object[] head; // Reference to first object of array
     private @MinLen Object[] tail; // Reference to the last object of the array
 
-    // Position of the next element to be added
-    private @NonNegative int offset;
+    // Position of the next element to be added, at most could be equal to capacity but will never be higher by construction
+    private @NonNegative @LTLengthOf("tail") int offset;
 
     /**
      * Constructs an empty list with a per-link capacity.
@@ -49,13 +48,18 @@ class AppendOnlyLinkedArrayList<T> {
      */
     void add(T value) {
         // Save locally capacity of the array and the current offset (index to save next element)
-        final @NonNegative int c = capacity;
+        final @NonNegative @LTLengthOf("tail") int c = capacity;
         // Get the index of the last element
-        int o = offset;
-        // If we have filled up the entire array, we need to enlarge it
+        @NonNegative @LTLengthOf("tail") int o = offset;
+        // Check if o is higher than the capacity of the array (not a valid index)
         if (o == c) {
-            Object[] next = new Object[c + 1]; // Add one more slot for the next link
+            // Add one more slot for the next link
+            Object[] next = new Object[c + 1];
             tail[c] = next;
+
+            // Help CheckerFramework understand what is happening here
+//            assert tail.length == c + 1: "@AssumeAssertion(index): CheckerFramework is not able to infer that we have created a new array of length c + 1";
+
             tail = next;
             o = 0;
         }
@@ -83,9 +87,10 @@ class AppendOnlyLinkedArrayList<T> {
     @SuppressWarnings("unchecked")
     void forEachWhile(NonThrowingPredicate<? super T> consumer) {
         Object[] a = head;
-        final int c = capacity;
+        final @NonNegative @LTLengthOf("a") int c = capacity;
+        // While the element is not null
         while (a != null) {
-            for (int i = 0; i < c; i++) {
+            for (@NonNegative int i = 0; i < c; i++) {
                 Object o = a[i];
                 if (o == null) {
                     break;
@@ -94,6 +99,7 @@ class AppendOnlyLinkedArrayList<T> {
                     break;
                 }
             }
+            // move to next element in array
             a = (Object[]) a[c];
         }
     }
@@ -101,9 +107,9 @@ class AppendOnlyLinkedArrayList<T> {
     @SuppressWarnings("unchecked")
     void accept(Relay<? super T> observer) {
         Object[] a = head;
-        final @NonNegative int c = capacity;
+        final @NonNegative @LTLengthOf("a") int c = capacity;
         while (a != null) {
-            for (int i = 0; i < c; i++) {
+            for (@NonNegative int i = 0; i < c; i++) {
                 Object o = a[i];
                 if (o == null) {
                     break;
