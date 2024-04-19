@@ -19,6 +19,8 @@ import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.disposables.Disposable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.checkerframework.checker.index.qual.LengthOf;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.common.value.qual.MinLen;
 
@@ -50,7 +52,7 @@ public final class PublishRelay<T> extends Relay<T> {
     static final PublishDisposable[] EMPTY = new PublishDisposable[0];
 
     /** The array of currently subscribed subscribers. */
-    final @MinLen(1) AtomicReference<PublishDisposable<T>[]> subscribers;
+    final AtomicReference<PublishDisposable<T>[]> subscribers;
 
     /**
      * Constructs a PublishRelay.
@@ -107,12 +109,12 @@ public final class PublishRelay<T> extends Relay<T> {
     @SuppressWarnings("unchecked")
     void remove(PublishDisposable<T> ps) {
         for (;;) {
-            @MinLen(1) PublishDisposable<T>[] a = subscribers.get();
+            PublishDisposable<T>[] a = subscribers.get();
             if (a == EMPTY) {
                 return;
             }
 
-            int n = a.length;
+            @NonNegative @LengthOf("a") int n = a.length;
             int j = -1;
             for (int i = 0; i < n; i++) {
                 if (a[i] == ps) {
@@ -125,12 +127,18 @@ public final class PublishRelay<T> extends Relay<T> {
                 return;
             }
 
-            PublishDisposable<T>[] b;
+            // infer manually information about the len and j variables as checker framework is not able to
+            // a) infer that j is for sure less than the length
+            assert j < n: "@AssumeAssertion(index): by nature, j is always less than the length (as the loop condition is i < n)";
 
+            PublishDisposable<T>[] b;
             if (n == 1) {
+                // If the length is 1, we can just use the EMPTY array (we have removed the only item)
                 b = EMPTY;
             } else {
+                // On the other hand, if the length is greater than 1, we need to create a new array
                 b = new PublishDisposable[n - 1];
+                // We copy the items before and after the item (effectively removing it)
                 System.arraycopy(a, 0, b, 0, j);
                 System.arraycopy(a, j + 1, b, j, n - j - 1);
             }

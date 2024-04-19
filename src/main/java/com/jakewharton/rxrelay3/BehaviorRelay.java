@@ -248,9 +248,9 @@ public final class BehaviorRelay<T> extends Relay<T> {
                 return;
             }
 
-            // Infer manually information about the len and j variables as Checker Framework is not able to
-            // a) Infer that J is for sure less than the length
-            assert j < len: "@AssumeAssertion(index): By nature, J is always less than the length (as the loop condition is i < len)";
+            // infer manually information about the len and j variables as checker framework is not able to
+            // a) infer that j is for sure less than the length
+            assert j < len: "@AssumeAssertion(index): by nature, j is always less than the length (as the loop condition is i < len)";
 
             // Create a new array with the item removed
             BehaviorDisposable<T>[] b;
