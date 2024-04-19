@@ -26,9 +26,9 @@ class AppendOnlyLinkedArrayList<T> {
 
     private final @NonNegative @LTLengthOf({"head", "tail"}) int capacity;
     private final @MinLen(1) Object[] head; // Reference to first object of array
-    private @MinLen Object[] tail; // Reference to the last object of the array
+    private @MinLen(1) Object[] tail; // Reference to the last object of the array
 
-    // Position of the next element to be added, at most could be equal to capacity but will never be higher by construction
+    // Position of the first empty spot in the array (by construction, could be at most equal to capacity)
     private @NonNegative @LTLengthOf("tail") int offset;
 
     /**
@@ -46,6 +46,7 @@ class AppendOnlyLinkedArrayList<T> {
      * <p>Don't add null to the list!
      * @param value the value to append
      */
+    @SuppressWarnings("value:assignment") // Check NOTICE!
     void add(T value) {
         // Save locally capacity of the array and the current offset (index to save next element)
         final @NonNegative @LTLengthOf("tail") int c = capacity;
@@ -53,16 +54,27 @@ class AppendOnlyLinkedArrayList<T> {
         @NonNegative @LTLengthOf("tail") int o = offset;
         // Check if o is higher than the capacity of the array (not a valid index)
         if (o == c) {
-            // Add one more slot for the next link
-            Object[] next = new Object[c + 1];
+            // If the capacity is reached, we create an array of size c+1 (we double the size)
+            @MinLen(1) Object[] next = new Object[c + 1];
+
+            // We assign this array as the last element of the linked list
+            // NOTICE: This is a trick to avoid using a linked list data structure, but still have a linked list behavior.
+            //          unfortunately, CheckerFramework does not like this kind of operation and will throw a warning as
+            //          the type of the array cell is Object and not Object[]. For this reason, we have to suppress the
+            //          warning.
             tail[c] = next;
 
-            // Help CheckerFramework understand what is happening here
-//            assert tail.length == c + 1: "@AssumeAssertion(index): CheckerFramework is not able to infer that we have created a new array of length c + 1";
-
+            // We move the tail on the new array, meaning we are now working on the newly created array
+            // This effectively doubles the size of the linked list!
             tail = next;
+
+            // Reset the offset to 0 in order to use the new array in its entirely
             o = 0;
         }
+
+        // The offset is now guaranteed to be less than the capacity of the array!
+        assert o < c: "@AssumeAssertion(index): CheckerFramework is not able to understand that o is always less than c";
+
         // Save the value at the current offset
         tail[o] = value;
         // Increase the offset to the next slot
