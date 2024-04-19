@@ -1,14 +1,17 @@
+.PHONY:setup
 setup:
-	@echo "Setting up the Java environment"
+	@echo "Setting up the Java environment..."
 	@./scripts/setup.sh
 	@echo "Java environment setup complete."
 
+.PHONY:build
 build:
-	@echo "Building the Java project"
-	@./scripts/build.h
+	@echo "Building project..."
+	@./scripts/build.sh
 	@echo "Java project build complete."
 
+.PHONY:compile
 compile:
-	@echo "Checking the Java project"
+	@echo "Compiling project..."
 	@bash ./scripts/compile.sh
 	@echo "Java project check complete."
