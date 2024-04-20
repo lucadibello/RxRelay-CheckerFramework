@@ -7,3 +7,6 @@
 # Include all LaTeX files and the bibliography
 !*.tex
 !*.bib
+
+# Include also the generated PDF
+#!*.pdf
