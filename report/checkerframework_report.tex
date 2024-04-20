@@ -38,14 +38,51 @@ This assignment aims to extend the Java type system with the \textit{Checker Fra
 
 \noindent To showcase the effectiveness of this tool, the Checker Framework's index checker has been integrated into an existing codebase to prevent any out-of-bounds access to arrays. The project is a legacy Java library named \texttt{RxRelay}\footnote{\url{https://github.com/JakeWharton/RxRelay}}, a small library that aims to extend the capabilities of a famous Java library called \texttt{RxJava} by providing a set of \texttt{Relay} classes that act as both an \texttt{Observable} and a \texttt{Consumer}. The library is used to relay events from one component to another, and it is widely used in Android applications. \cite{rxrelay:readme}
 
-The library is composed of a single package, \texttt{com.jakewharton.rxrelay2}, and it contains a total of 5 classes. The library is built using Gradle, and it is compatible with Java 8 and above.
+The library is composed of a single package, \texttt{com.jakewharton.rxrelay3}, and it contains a total of 5 Java files
+
+\begin{itemize}
+    \item \texttt{Relay.java}: An interface that extends both RxJava's \texttt{Observable} and \texttt{Consumer} interfaces. This interface is implemented by all the relay classes to provide a general API for relaying events.
+
+    \item \texttt{AppendOnlyLinkedList.java}: An unconventional unbounded linked list implementation that is used by several relay classes to store events. Rather than using a traditional Node-based linked list, this implementation uses a single array, which is then expanded when it reaches its capacity. This is done using a clever trick that allows the array to be expanded without the need to copy the elements from the old array to the new one.
+
+    \item \texttt{PublishRelay.java}: A concrete implementation of the \texttt{Relay} interface that relays events to all the subscribers that are currently subscribed to it.
+
+    \item \texttt{ReplayRelay.java}: Another \texttt{Relay} implementation that relays events to all the subscribers that are currently subscribed to it, but it also caches a certain number of events and replays them to new subscribers when they subscribe.
+
+    \item \texttt{BehaviorRelay.java}: A \texttt{PublishRelay} implementation that relays only the most recent event to new subscribers. This is done by caching the most recent event and replaying it to new subscribers when they subscribe.
+\end{itemize}
 
 \pagebreak
 
 \section{Project setup}
 
+The project uses Java 8 and uses \textit{Maven} as a build system. The \textit{Checker Framework} is integrated into the project using the \texttt{checker-qual} dependency, which provides the necessary annotations to use the checkers. The \texttt{maven-compiler-plugin} has been configured to use the \textit{Checker Framework} as annotation processor and to Google's \texttt{Error Prone} as a compiler plugin to provide additional static analysis checks.
 
-includes pluggable compiler plug-ins that can find bugs or verify their absence.
+Additional compiler flags have been added to the \texttt{maven-compiler-plugin} configuration to enable additional features of the framework. The configuration is as follows:
+
+\begin{itemize}
+    \item \texttt{-Xmaxerrs 10000}: Set the maximum number of errors to display before stopping the compilation process.
+
+    \item \texttt{-Xmaxwarns 10000}: Similar to \texttt{-Xmaxerrs}, but for warnings.
+
+    \item \texttt{-Awarns}: Show \textit{Checker Framework} errors as warnings instead of errors to allow the compilation process to continue even if errors are found.
+
+    \item \texttt{-AresolveReflection}: Enable the reflection resolver, which is used to resolve reflection calls at compile time. This is useful to infer the type of reflection calls such as \texttt{Array.newInstance} or \texttt{Class.forName}.
+
+    \item \texttt{-ArequirePrefixInWarningSuppressions}: Require the \texttt{\@SuppressWarnings} annotation to have a prefix that matches the checker name. This is useful to prevent accidental suppression of warnings from other checkers. For example, to suppress a warning from the \texttt{Index Checker}, the annotation should formatted as \texttt{\@SuppressWarnings("index:<specific\_error\_to\_suppress>")}.
+
+    \item \texttt{-AassumeAssertionsAreEnabled}: This flag enables the framework to infer additional information about the assertions made in the code. This is useful to help the framework understand complex control flows.
+\end{itemize}
+
+A small \texttt{Makefile} along with some scripts have been provided to simplify the testing and compilation of the project. The \texttt{Makefile} contains the following targets:
+
+\begin{itemize}
+    \item \texttt{setup}: Setup the project by setting the right Java version and installing the necessary dependencies using \textit{Maven}'s CLI tool \texttt{mvn}.
+
+    \item \texttt{build}: Build the project using \textit{Maven}.
+
+    \item \texttt{compile}: Compile the project using \textit{Maven}.
+\end{itemize}
 
 \pagebreak
 
