@@ -1,0 +1,65 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[top=3cm, bottom=3cm, left = 2cm, right = 2cm]{geometry}
+\geometry{a4paper}
+\usepackage[utf8]{inputenc}
+\usepackage{textcomp}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage[pdftex,bookmarks,colorlinks,breaklinks]{hyperref}
+\hypersetup{linkcolor=black,citecolor=black,filecolor=black,urlcolor=black} % black links, for printed output
+\usepackage{memhfixc}
+\usepackage{pdfsync}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\setlength{\headheight}{13.6pt}
+
+\title{Extented Java Typechecking with Checker Framework \\[1ex] \large Software Analysis - Assignment 2}
+\author{Luca Di Bello}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{Introduction}
+
+This assignment aims to extend the Java type system with the \textit{Checker Framework}\footnote{\url{https://checkerframework.org/}}. The \textit{Checker Framework} is a powerful tool that integrates with the Java compiler to detect bugs and verify their absence at compile time. This is done by pluggable type-checkers, which via explicit annotations in the code, are able to check for a wide range of errors, such as null pointer dereferences, type casts, and array bounds.  It includes over 20 type-checkers, which can be used to verify a wide range of properties. Some of the most useful type-checkers include:
+
+\begin{itemize}
+    \item \textbf{Nullness Checker}: Prevent any \texttt{NullPointerException} by ensuring that variables are not null when dereferenced.
+    \item \textbf{Index Checker}: Prevents array index out-of-bounds errors by ensuring that array accesses are always within bounds.
+    \item \textbf{Regex Checker}: Prevents runtime exceptions due to invalid regular expressions by checking the syntax of regular expressions at compile time.
+\end{itemize}
+
+\textit{Note: a full list of available checkers can be found on the Checker Framework manual in the \texttt{Introduction} section}
+
+\pagebreak
+
+\noindent To showcase the effectiveness of this tool, the Checker Framework's index checker has been integrated into an existing codebase to prevent any out-of-bounds access to arrays. The project is a legacy Java library named \texttt{RxRelay}\footnote{\url{https://github.com/JakeWharton/RxRelay}}, a small library that aims to extend the capabilities of a famous Java library called \texttt{RxJava} by providing a set of \texttt{Relay} classes that act as both an \texttt{Observable} and a \texttt{Consumer}. The library is used to relay events from one component to another, and it is widely used in Android applications. \cite{rxrelay:readme}
+
+The library is composed of a single package, \texttt{com.jakewharton.rxrelay2}, and it contains a total of 5 classes. The library is built using Gradle, and it is compatible with Java 8 and above.
+
+\pagebreak
+
+\section{Project setup}
+
+
+includes pluggable compiler plug-ins that can find bugs or verify their absence.
+
+\pagebreak
+
+\section{System Design}
+
+\pagebreak
+
+\section{Evaluation}
+
+\pagebreak
+
+\section{Conclusions and Future Work}
+
+\nocite{*} % Force to show all references in references.bib file
+\bibliographystyle{abbrv}
+\bibliography{references}  % need to put bibtex references in references.bib
+\end{document}
