@@ -11,6 +11,7 @@
 \usepackage{memhfixc}
 \usepackage{pdfsync}
 \usepackage{fancyhdr}
+\usepackage{listings}
 \pagestyle{fancy}
 \setlength{\headheight}{13.6pt}
 
@@ -88,21 +89,38 @@ A small \texttt{Makefile} along with some scripts have been provided to simplify
 
 \pagebreak
 
-\section{Integration of the Index Checker}
+\section{Integration of the Index Checker: Challenges and Solutions}
 
-The \textit{Index Checker} has been successfully integrated into the project by adding the necessary annotations to the codebase to ensure that all array accesses are within bounds. At first, the checker found more than 50 errors in the codebase, which were mostly due to some Java idioms that are not supported by the checker out-of-the-box. These idioms include:
+The \textit{Index Checker} has been successfully integrated into the project by adding the necessary annotations to the codebase to ensure that all array accesses are within bounds. At first, the checker was able to find several errors, which were then fixed one by one using the provided set of annotations.
 
-\begin{itemize}
-    \item Using \texttt{Arrays.I}
-\end{itemize}
+As certain Java idioms used in the project were not supported out-of-the-box by the checker as they would require reflection to be resolved, for this reason the \texttt{-AresolveReflection} flag was enabled to allow the checker to resolve reflection calls at compile time. Without this flag, the checker would not be able to infer the type of reflection calls such as \texttt{Array.newInstance} or \texttt{Class.forName}, used several times in the project specifically in the \texttt{AppendOnlyLinkedList} class to expand the array when it reaches its capacity.
+
+Unfortunately, even after enabling the reflection resolver, the checker was unable to resolve certain reflection calls, specifically the ones related to creating new arrays using \texttt{Array.newInstance}. For example, the following code snippet was not correctly inferred by the checker:
+
+\begin{lstlisting}[language=java,breaklines=true,caption={Reflection call to create a new array},label={lst:reflection-array},captionpos=b]
+if (array.length < s) {
+    // create a new array of size s
+    array = (t[]) array.newinstance(array.getclass().getcomponenttype(), s);
+}
+\end{lstlisting}
+
+To fix this issue, the checker was instructed to leverage assertions to provide additional information about the code. This was done by enabling the \texttt{-AassumeAssertionsAreEnabled} flag. Along with this, as explicitly advised in the documentation of the checker, each assertion is accompanied by a comment that explains what checkers it is intended to help, with a brief description of why the assertion was needed. The code before has been modified as follows:
+
+\begin{lstlisting}[language=java,breaklines=true,caption={Using assertions to help the Index Checker infer the array length},label={lst:array-length},captionpos=b]
+if (array.length < s) {
+    // create a new array of size s
+    array = (t[]) array.newinstance(array.getclass().getcomponenttype(), s);
+
+    // As the CheckerFramework is not able to infer that the array is of length s, we need to make an assertion
+    assert array.length == s: "@AssumeAssertion(index): The array is exactly of length s, as we have just created it";
+}
+\end{lstlisting}
 
 \pagebreak
 
-\section{Evaluation}
-
 \pagebreak
 
-\section{Conclusions and Future Work}
+\section{Conclusions}
 
 \nocite{*} % Force to show all references in references.bib file
 \bibliographystyle{abbrv}
