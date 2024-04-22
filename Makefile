@@ -17,7 +17,7 @@ compile:
 	@echo "Java project check complete."
 
 .PHONY:test
-test: compile
+test:
 	@echo "Running tests..."
 	@./scripts/test.sh
 	@echo "Java project tests complete."
