@@ -84,7 +84,7 @@ public class BehaviorRelayTest {
 
     @Test(timeout = 1000)
     public void testUnsubscriptionCase() {
-        BehaviorRelay<String> src = BehaviorRelay.createDefault("null"); // FIXME was plain null which is not allowed
+        BehaviorRelay<String> src = BehaviorRelay.createDefault("null");
 
         for (int i = 0; i < 10; i++) {
             final Observer<Object> o = TestHelper.mockObserver();
