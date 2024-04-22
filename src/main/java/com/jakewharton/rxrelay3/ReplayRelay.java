@@ -660,13 +660,13 @@ public final class ReplayRelay<T> extends Relay<T> {
             } else {
                 if (array.length < s) {
                     array = (T[]) Array.newInstance(array.getClass().getComponentType(), s);
+                    // As the CheckerFramework is not able to infer that the array is of length s, we need to make an assertion
+                    assert array.length == s: "@AssumeAssertion(index): The array is exactly of length s, as we have just created it";
                 }
 
-                // HELPER VARIABLE: CheckerFramework does not infer that the array is at least s long (array.length >= s)
-                // I think that the call to Array.newInstance is not enough to infer that the array is at least s long
-                @NonNegative @LTEqLengthOf("array") int actualS = Math.min(array.length, s);
+                // We fill up the array
                 @NonNegative @LTEqLengthOf("array") int i = 0;
-                while (i < actualS) {
+                while (i < s) {
                     Node<T> next = h.get();
                     array[i] = next.value;
                     i++;
@@ -891,13 +891,13 @@ public final class ReplayRelay<T> extends Relay<T> {
                 if (array.length < s) {
                     // Now the array has length s: array.length == s
                     array = (T[]) Array.newInstance(array.getClass().getComponentType(), s); // Is this supported by Checker Framework?
+                    // As the CheckerFramework is not able to infer that the array is of length s, we need to make an assertion
+                    assert array.length == s: "@AssumeAssertion(index): The array is exactly of length s, as we have just created it";
                 }
 
-                // HELPER VARIABLE: CheckerFramework does not infer that the array is at least s long (array.length >= s)
-                // I think that the call to Array.newInstance is not enough to infer that the array is at least s long
-                @NonNegative @LTEqLengthOf("array") int actualS = Math.min(array.length, s);
+                // We fill the array with the elements of the linked list
                 @NonNegative @LTEqLengthOf("array") int i = 0;
-                while (i < actualS) {
+                while (i < s) {
                     TimedNode<T> next = h.get();
                     array[i] = next.value;
                     i++;
