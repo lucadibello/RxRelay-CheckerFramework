@@ -86,7 +86,13 @@ A small \texttt{Makefile} along with some scripts have been provided to simplify
 
 \pagebreak
 
-\section{System Design}
+\section{Integration of the Index Checker}
+
+The \textit{Index Checker} has been successfully integrated into the project by adding the necessary annotations to the codebase to ensure that all array accesses are within bounds. At first, the checker found more than 50 errors in the codebase, which were mostly due to some Java idioms that are not supported by the checker out-of-the-box. These idioms include:
+
+\begin{itemize}
+    \item Using \texttt{Arrays.I}
+\end{itemize}
 
 \pagebreak
 
