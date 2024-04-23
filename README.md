@@ -1,16 +1,5 @@
----
-author:
-- Luca Di Bello
-bibliography:
-- references.bib
-date: 2024-04-23
-nocite: "[@*]"
-title: |
-  Extented Java Typechecking with Checker Framework\
-  Software Analysis - Assignment 2
----
-
-# Introduction
+# RxRelay-CheckerFramework
+## Introduction
 
 This assignment aims to extend the Java type system with the *Checker
 Framework*[^1]. The *Checker Framework* is a powerful tool that
@@ -77,7 +66,7 @@ contains a total of 6 Java files:
     caching the most recent event and replaying it to new subscribers
     when they subscribe.
 
-# Project setup
+## Project setup
 
 The project uses Java 8 and uses *Maven* as a build system. The *Checker
 Framework* is integrated into the project using the `checker-qual`
@@ -130,7 +119,7 @@ contains the following targets:
 
 -   `test`: Run unit tests and mock tests using *Maven*.
 
-# Integration of the Index Checker: Challenges and Solutions
+## Integration of the Index Checker: Challenges and Solutions
 
 The *Index Checker* has been successfully integrated into the project by
 adding the necessary annotations to the codebase to ensure that all
@@ -302,7 +291,7 @@ annotated without major issues: the `PublishRelay`, `ReplayRelay`, and
 *Checker Framework* to fully verify the absence of out-of-bounds array
 accesses in the project.
 
-# Conclusions
+## Conclusions
 
 The integration of the *Checker Framework's Index Checker* into the
 `RxRelay` project has been successful, and the checker has been able to
