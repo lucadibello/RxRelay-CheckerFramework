@@ -1,7 +1,10 @@
-# RxRelay-CheckerFramework
+# RxRelay-CheckerFramework<!-- omit in toc -->
+
+TL;DR: RxRelay extended with *Checker Framework’s Index Checker* to rule out any out-of-bound array access in the code.
+
 ## Introduction
 
-This assignment aims to extend the Java type system with the *Checker
+This project aims to extend the Java type system with the *Checker
 Framework*[^1]. The *Checker Framework* is a powerful tool that
 integrates with the Java compiler to detect bugs and verify their
 absence at compile time. This is done by pluggable type-checkers, which
